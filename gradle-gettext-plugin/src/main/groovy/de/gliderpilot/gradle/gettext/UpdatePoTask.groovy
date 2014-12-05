@@ -57,6 +57,8 @@ class UpdatePoTask extends AbstractGettextTask {
             }
         }
         inputs.removed { removed ->
+            File template = removed.file
+            String baseName = template.name - '.pot'
             translations.findAll { it.name.contains(baseName) }*.delete()
         }
     }
