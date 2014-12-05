@@ -16,13 +16,14 @@
 package de.gliderpilot.gradle.gettext
 
 import groovy.io.FileType
+import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 
-class UpdatePotFromPropertiesTask extends AbstractGettextTask {
+class UpdatePotFromPropertiesTask extends DefaultTask {
 
     @InputFiles
     FileCollection from
@@ -44,7 +45,9 @@ class UpdatePotFromPropertiesTask extends AbstractGettextTask {
     @TaskAction
     def updatePot(IncrementalTaskInputs inputs) {
         inputs.outOfDate { outOfDate ->
-            execute "prop2po --personality=mozilla --pot ${outOfDate.file} $into"
+            project.exec {
+                commandLine "prop2po", "--personality=mozilla", "--pot", "${outOfDate.file}", "$into"
+            }
         }
         inputs.removed { removed ->
             String baseName = removed.file.name - '.properties'

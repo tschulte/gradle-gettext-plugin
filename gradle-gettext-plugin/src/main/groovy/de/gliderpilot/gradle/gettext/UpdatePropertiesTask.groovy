@@ -16,13 +16,14 @@
 package de.gliderpilot.gradle.gettext
 
 import groovy.io.FileType
+import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 
-class UpdatePropertiesTask extends AbstractGettextTask {
+class UpdatePropertiesTask extends DefaultTask {
 
     @InputFiles
     FileCollection from
@@ -46,7 +47,9 @@ class UpdatePropertiesTask extends AbstractGettextTask {
             def file = outOfDate.file
             int i = file.name.indexOf('_')
             String baseName = file.name.substring(0, i)
-            execute "po2prop --personality=mozilla --removeuntranslated -t ${file.parent}/${baseName}.properties $file $into"
+            project.exec {
+                commandLine "po2prop", "--personality=mozilla", "--removeuntranslated", "-t", "${file.parent}/${baseName}.properties", "$file", "$into"
+            }
         }
         inputs.removed { removed ->
             new File(into, removed.file.name.replace('.po', '.properties')).delete()
