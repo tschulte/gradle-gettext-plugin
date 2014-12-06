@@ -37,6 +37,7 @@ class UpdatePotFromPropertiesIntegrationSpec extends AbstractPluginSpecification
 
     def cleanup() {
         project.cleanup()
+        project.file('src/main/i18n').deleteDir()
     }
 
     def "updatePot is finalized by updatePo"() {
