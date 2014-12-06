@@ -27,7 +27,12 @@ class GradleGettextPlugin implements Plugin<Project> {
         project.sourceSets.all { SourceSet sourceSet ->
             def poDir = "src/${sourceSet.name}/i18n"
             def propertiesDir = "src/${sourceSet.name}/i18n"
+            def updatePropertiesTask = project.tasks.create(sourceSet.getTaskName('update', 'Properties'), UpdatePropertiesTask) {
+                from poDir
+                into propertiesDir
+            }
             def updatePoTask = project.tasks.create(sourceSet.getTaskName('update', 'Po'), UpdatePoTask) {
+                finalizedBy updatePropertiesTask
                 from poDir
                 into poDir
             }
@@ -40,10 +45,6 @@ class GradleGettextPlugin implements Plugin<Project> {
                 finalizedBy updatePotTask
                 from propertiesDir
                 into poDir
-            }
-            project.tasks.create(sourceSet.getTaskName('update', 'Properties'), UpdatePropertiesTask) {
-                from poDir
-                into propertiesDir
             }
         }
     }
