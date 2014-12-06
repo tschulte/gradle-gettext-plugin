@@ -44,9 +44,15 @@ class UpdatePotFromPropertiesTask extends DefaultTask {
 
     @TaskAction
     def updatePot(IncrementalTaskInputs inputs) {
+        def propertyFiles = []
         inputs.outOfDate { outOfDate ->
+            propertyFiles << (outOfDate.file.toString() - project.projectDir.toString()).substring(1)
+        }
+        if (propertyFiles) {
             project.exec {
-                commandLine "prop2po", "--personality=mozilla", "--pot", "${outOfDate.file}", "$into"
+                commandLine "prop2po", "--progress=none", "--personality=mozilla", "--pot"
+                args propertyFiles
+                args "$into"
             }
         }
         inputs.removed { removed ->
