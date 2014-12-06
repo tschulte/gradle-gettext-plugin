@@ -44,6 +44,11 @@ class UpdatePotFromPropertiesTask extends DefaultTask {
 
     @TaskAction
     def updatePot(IncrementalTaskInputs inputs) {
+        if (!inputs.incremental) {
+            into.eachFileMatch(FileType.FILES, ~/.*\.pot/) {
+                it.delete()
+            }
+        }
         def propertyFiles = []
         inputs.outOfDate { outOfDate ->
             propertyFiles << (outOfDate.file.toString() - project.projectDir.toString()).substring(1)
