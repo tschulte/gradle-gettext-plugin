@@ -43,18 +43,18 @@ class ImportResourceBundlesTask extends DefaultTask {
     }
 
     @TaskAction
-    def importBundles(IncrementalTaskInputs taskInputs) {
-        taskInputs.outOfDate { outOfDate ->
-            def file = outOfDate.file
+    def importBundles() {
+        from.each { file ->
             int i = file.name.indexOf('_')
             String baseName = file.name.substring(0, i)
             String poFileName = (file.name - '.properties') + '.po'
-            if (!new File(into, poFileName).exists())
+            if (!new File(into, poFileName).exists()) {
                 project.exec {
                     commandLine "prop2po", "--personality=mozilla", "-t", "${file.parent}/${baseName}.properties", "$file", "$into"
                 }
-            else
+            } else {
                 logger.info("not importing ${file.name}, because po file already exists")
+            }
         }
     }
 
