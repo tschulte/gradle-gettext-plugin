@@ -32,6 +32,7 @@ class IntegrationTestProject {
         project.metaClass.getSettingsFile = intTest.&getSettingsFile
         project.metaClass.wasExecuted = intTest.&wasExecuted
         project.metaClass.wasUpToDate = intTest.&wasUpToDate
+        project.metaClass.cleanup = intTest.&cleanup
         project
     }
 
@@ -81,4 +82,7 @@ class IntegrationTestProject {
         executedTasks.any { it == taskPath }
     }
 
+    def cleanup() {
+        executedTasks.clear()
+    }
 }
