@@ -146,4 +146,14 @@ class ImportResourceBundlesIntegrationSpec extends AbstractPluginSpecification {
         project.file('src/main/i18n/empty-translation-for-non-empty_de.po').exists()
     }
 
+    def "non empty properties file without template properties file results in no po file"() {
+        setup:
+        project.createFile('src/main/i18n/non-empty-translation-without-template_de.properties').text = 'key=translated'
+
+        when:
+        project.run(':importResourceBundles')
+
+        then:
+        project.file('src/main/i18n/non-empty-translation-without-template_de.po').exists()
+    }
 }
