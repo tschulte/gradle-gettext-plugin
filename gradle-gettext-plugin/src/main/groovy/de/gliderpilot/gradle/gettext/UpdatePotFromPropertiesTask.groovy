@@ -62,7 +62,7 @@ class UpdatePotFromPropertiesTask extends DefaultTask {
         }
         inputs.removed { removed ->
             String baseName = removed.file.name - '.properties'
-            into.eachFileMatch(FileType.FILES, ~/baseName\.pot/) {
+            into.eachFileMatch(FileType.FILES, { it == "${baseName}.pot" }) {
                 it.delete()
             }
         }

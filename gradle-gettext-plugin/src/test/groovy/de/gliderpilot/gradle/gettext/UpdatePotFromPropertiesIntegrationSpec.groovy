@@ -87,4 +87,30 @@ class UpdatePotFromPropertiesIntegrationSpec extends AbstractPluginSpecification
         project.file('src/main/i18n/duplicate-keys.pot').exists()
     }
 
+    def "removing keys from properties file removes pot"() {
+        setup:
+        project.createFile('src/main/i18n/props.properties').text = 'key=value'
+        project.run(':updatePot')
+        project.file('src/main/i18n/props.properties').text = ''
+
+        when:
+        project.run(':updatePot')
+
+        then:
+        !project.file('src/main/i18n/props.pot').exists()
+    }
+
+    def "removing properties file removes pot"() {
+        setup:
+        project.createFile('src/main/i18n/props.properties').text = 'key=value'
+        project.run(':updatePot')
+        project.delete project.file('src/main/i18n/props.properties')
+
+        when:
+        project.run(':updatePot')
+
+        then:
+        !project.file('src/main/i18n/props.pot').exists()
+    }
+
 }
