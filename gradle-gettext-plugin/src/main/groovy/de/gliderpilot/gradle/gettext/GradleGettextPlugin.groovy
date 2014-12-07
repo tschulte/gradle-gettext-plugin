@@ -23,29 +23,26 @@ class GradleGettextPlugin implements Plugin<Project> {
 
     void apply(Project project) {
         project.extensions.create('gettext', GradleGettextPluginExtension, this, project)
-        project.apply plugin: 'java-base'
-        project.sourceSets.all { SourceSet sourceSet ->
-            def poDir = "src/${sourceSet.name}/i18n"
-            def propertiesDir = "src/${sourceSet.name}/i18n"
-            def updatePropertiesTask = project.tasks.create(sourceSet.getTaskName('update', 'Properties'), UpdatePropertiesTask) {
-                from poDir
-                into propertiesDir
-            }
-            def updatePoTask = project.tasks.create(sourceSet.getTaskName('update', 'Po'), UpdatePoTask) {
-                finalizedBy updatePropertiesTask
-                from poDir
-                into poDir
-            }
-            def updatePotTask = project.tasks.create(sourceSet.getTaskName('update', 'Pot'), UpdatePotFromPropertiesTask) {
-                finalizedBy updatePoTask
-                from propertiesDir
-                into poDir
-            }
-            project.tasks.create(sourceSet.getTaskName('import', 'ResourceBundles'), ImportResourceBundlesTask) {
-                finalizedBy updatePotTask
-                from propertiesDir
-                into poDir
-            }
+        def poDir = "src/main/i18n"
+        def propertiesDir = "src/main/i18n"
+        def updatePropertiesTask = project.tasks.create('updateProperties', UpdatePropertiesTask) {
+            from poDir
+            into propertiesDir
+        }
+        def updatePoTask = project.tasks.create('updatePo', UpdatePoTask) {
+            finalizedBy updatePropertiesTask
+            from poDir
+            into poDir
+        }
+        def updatePotTask = project.tasks.create('updatePot', UpdatePotFromPropertiesTask) {
+            finalizedBy updatePoTask
+            from propertiesDir
+            into poDir
+        }
+        project.tasks.create('importResourceBundles', ImportResourceBundlesTask) {
+            finalizedBy updatePotTask
+            from propertiesDir
+            into poDir
         }
     }
 }

@@ -29,7 +29,6 @@ class ImportResourceBundlesIntegrationSpec extends AbstractPluginSpecification {
                     classpath files('${new File('build/resources/main').absoluteFile.toURI()}')
                 }
             }
-            apply plugin: 'java'
             apply plugin: 'de.gliderpilot.gettext'
         """
     }
