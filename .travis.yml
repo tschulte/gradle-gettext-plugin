@@ -4,5 +4,7 @@ jdk: oraclejdk7
 env: TERM=dumb
 after_success: ./gradlew coveralls
 before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y translate-toolkit gettext
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
