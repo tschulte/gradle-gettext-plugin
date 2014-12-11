@@ -26,23 +26,23 @@ class GradleGettextPlugin implements Plugin<Project> {
         def poDir = "src/main/i18n"
         def propertiesDir = "src/main/i18n"
         def updatePropertiesTask = project.tasks.create('updateProperties', UpdatePropertiesTask) {
-            from poDir
-            into propertiesDir
+            poFiles poDir
+            delegate.propertiesDir propertiesDir
         }
         def updatePoTask = project.tasks.create('updatePo', UpdatePoTask) {
             finalizedBy updatePropertiesTask
-            from poDir
-            into poDir
+            poTemplateFiles poDir
+            poFiles poDir
         }
         def updatePotTask = project.tasks.create('updatePot', UpdatePotFromPropertiesTask) {
             finalizedBy updatePoTask
-            from propertiesDir
-            into poDir
+            propertiesTemplateFiles propertiesDir
+            poTemplateDir poDir
         }
         project.tasks.create('importResourceBundles', ImportResourceBundlesTask) {
             finalizedBy updatePotTask
-            from propertiesDir
-            into poDir
+            propertiesFiles propertiesDir
+            delegate.poDir poDir
         }
     }
 }

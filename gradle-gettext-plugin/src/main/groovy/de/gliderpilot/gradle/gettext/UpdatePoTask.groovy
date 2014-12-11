@@ -28,19 +28,19 @@ import org.gradle.api.tasks.incremental.InputFileDetails
 class UpdatePoTask extends AbstractGettextTask {
 
     @InputFiles
-    FileCollection templates
+    FileCollection poTemplateFiles
 
     @OutputFiles
-    FileCollection translations
+    FileCollection poFiles
 
-    def from(from) {
-        this.templates = project.fileTree(from) {
+    def poTemplateFiles(poTemplateFiles) {
+        this.poTemplateFiles = project.fileTree(poTemplateFiles) {
             include '**/*.pot'
         }
     }
 
-    def into(into) {
-        this.translations = project.fileTree(into) {
+    def poFiles(poFiles) {
+        this.poFiles = project.fileTree(poFiles) {
             include '**/*.po'
         }
     }
@@ -50,7 +50,7 @@ class UpdatePoTask extends AbstractGettextTask {
         inputs.outOfDate { outOfDate ->
             File template = outOfDate.file
             String baseName = template.name - '.pot'
-            translations.findAll { it.name.contains(baseName) }.each { translation ->
+            poFiles.findAll { it.name.contains(baseName) }.each { translation ->
                 int i = translation.name.indexOf('_')
                 String lang = translation.name.substring(i + 1) - '.po'
                 exec "msgmerge -vU --backup=off --lang=$lang ${project.relativePath(translation)} ${project.relativePath(template)}"
@@ -59,7 +59,7 @@ class UpdatePoTask extends AbstractGettextTask {
         inputs.removed { removed ->
             File template = removed.file
             String baseName = template.name - '.pot'
-            translations.findAll { it.name.contains(baseName) }*.delete()
+            poFiles.findAll { it.name.contains(baseName) }*.delete()
         }
     }
 

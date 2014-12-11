@@ -23,30 +23,30 @@ import org.gradle.api.tasks.TaskAction
 class ImportResourceBundlesTask extends AbstractGettextTask {
 
     @InputFiles
-    FileCollection from
+    FileCollection propertiesFiles
 
     @OutputDirectory
-    File into
+    File poDir
 
-    def from(from) {
-        this.from = project.fileTree(from) {
+    def propertiesFiles(propertiesFiles) {
+        this.propertiesFiles = project.fileTree(propertiesFiles) {
             include '**/*_*.properties'
         }
     }
 
-    def into(into) {
-        this.into = project.file(into)
+    def poDir(poDir) {
+        this.poDir = project.file(poDir)
     }
 
     @TaskAction
     def importBundles() {
-        from.each { file ->
+        propertiesFiles.each { file ->
             int i = file.name.indexOf('_')
             String baseName = file.name.substring(0, i)
             String poFileName = (file.name - '.properties') + '.po'
-            File propertyTemplate = new File(file.parent, "${baseName}.properties")
-            if (!new File(into, poFileName).exists()) {
-                exec "prop2po --personality=mozilla -t ${project.relativePath(propertyTemplate)} ${project.relativePath(file)} ${project.relativePath(into)}"
+            File propertiesTemplate = new File(file.parent, "${baseName}.properties")
+            if (!new File(poDir, poFileName).exists()) {
+                exec "prop2po --personality=mozilla -t ${project.relativePath(propertiesTemplate)} ${project.relativePath(file)} ${project.relativePath(poDir)}"
             } else {
                 logger.info("not importing ${file.name}, because po file already exists")
             }

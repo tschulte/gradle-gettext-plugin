@@ -26,19 +26,19 @@ import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 class UpdatePropertiesTask extends AbstractGettextTask {
 
     @InputFiles
-    FileCollection from
+    FileCollection poFiles
 
     @OutputDirectory
-    File into
+    File propertiesDir
 
-    def from(from) {
-        this.from = project.fileTree(from) {
+    def poFiles(poFiles) {
+        this.poFiles = project.fileTree(poFiles) {
             include '**/*.po'
         }
     }
 
-    def into(into) {
-        this.into = project.file(into)
+    def propertiesDir(propertiesDir) {
+        this.propertiesDir = project.file(propertiesDir)
     }
 
     @TaskAction
@@ -47,11 +47,11 @@ class UpdatePropertiesTask extends AbstractGettextTask {
             def file = outOfDate.file
             int i = file.name.indexOf('_')
             String baseName = file.name.substring(0, i)
-            File propertyTemplate = new File(file.parent, "${baseName}.properties")
-            exec "po2prop --personality=mozilla --removeuntranslated -t ${project.relativePath(propertyTemplate)} ${project.relativePath(file)} ${project.relativePath(into)}"
+            File propertiesTemplate = new File(file.parent, "${baseName}.properties")
+            exec "po2prop --personality=mozilla --removeuntranslated -t ${project.relativePath(propertiesTemplate)} ${project.relativePath(file)} ${project.relativePath(propertiesDir)}"
         }
         inputs.removed { removed ->
-            new File(into, removed.file.name.replace('.po', '.properties')).delete()
+            new File(propertiesDir, removed.file.name.replace('.po', '.properties')).delete()
         }
     }
 
