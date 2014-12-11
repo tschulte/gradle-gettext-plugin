@@ -51,10 +51,10 @@ class UpdatePotFromPropertiesTask extends AbstractGettextTask {
         }
         def propertyFiles = []
         inputs.outOfDate { outOfDate ->
-            propertyFiles << (outOfDate.file.toString() - project.projectDir.toString()).substring(1)
+            propertyFiles << project.relativePath(outOfDate.file)
         }
         if (propertyFiles) {
-            exec "prop2po --progress=none --personality=mozilla --pot ${propertyFiles.join(' ')} $into"
+            exec "prop2po --progress=none --personality=mozilla --pot ${propertyFiles.join(' ')} ${project.relativePath(into)}"
         }
         inputs.removed { removed ->
             String baseName = removed.file.name - '.properties'

@@ -15,14 +15,10 @@
  */
 package de.gliderpilot.gradle.gettext
 
-import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.TaskExecutionException
-import org.gradle.api.tasks.TaskInputs
-import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 
 class ImportResourceBundlesTask extends AbstractGettextTask {
 
@@ -48,8 +44,9 @@ class ImportResourceBundlesTask extends AbstractGettextTask {
             int i = file.name.indexOf('_')
             String baseName = file.name.substring(0, i)
             String poFileName = (file.name - '.properties') + '.po'
+            File propertyTemplate = new File(file.parent, "${baseName}.properties")
             if (!new File(into, poFileName).exists()) {
-                exec "prop2po --personality=mozilla -t ${file.parent}/${baseName}.properties $file $into"
+                exec "prop2po --personality=mozilla -t ${project.relativePath(propertyTemplate)} ${project.relativePath(file)} ${project.relativePath(into)}"
             } else {
                 logger.info("not importing ${file.name}, because po file already exists")
             }

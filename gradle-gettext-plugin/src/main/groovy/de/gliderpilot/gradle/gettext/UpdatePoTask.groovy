@@ -53,7 +53,7 @@ class UpdatePoTask extends AbstractGettextTask {
             translations.findAll { it.name.contains(baseName) }.each { translation ->
                 int i = translation.name.indexOf('_')
                 String lang = translation.name.substring(i + 1) - '.po'
-                exec "msgmerge -vU --backup=off --lang=$lang $translation $template"
+                exec "msgmerge -vU --backup=off --lang=$lang ${project.relativePath(translation)} ${project.relativePath(template)}"
             }
         }
         inputs.removed { removed ->

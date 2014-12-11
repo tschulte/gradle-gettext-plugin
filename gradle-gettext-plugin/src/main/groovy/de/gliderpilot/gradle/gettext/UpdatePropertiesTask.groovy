@@ -47,7 +47,8 @@ class UpdatePropertiesTask extends AbstractGettextTask {
             def file = outOfDate.file
             int i = file.name.indexOf('_')
             String baseName = file.name.substring(0, i)
-            exec "po2prop --personality=mozilla --removeuntranslated -t ${file.parent}/${baseName}.properties $file $into"
+            File propertyTemplate = new File(file.parent, "${baseName}.properties")
+            exec "po2prop --personality=mozilla --removeuntranslated -t ${project.relativePath(propertyTemplate)} ${project.relativePath(file)} ${project.relativePath(into)}"
         }
         inputs.removed { removed ->
             new File(into, removed.file.name.replace('.po', '.properties')).delete()
