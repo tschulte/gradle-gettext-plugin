@@ -23,7 +23,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 
-class UpdatePotFromPropertiesTask extends DefaultTask {
+class UpdatePotFromPropertiesTask extends AbstractGettextTask {
 
     @InputFiles
     FileCollection from
@@ -54,11 +54,7 @@ class UpdatePotFromPropertiesTask extends DefaultTask {
             propertyFiles << (outOfDate.file.toString() - project.projectDir.toString()).substring(1)
         }
         if (propertyFiles) {
-            project.exec {
-                commandLine "prop2po", "--progress=none", "--personality=mozilla", "--pot"
-                args propertyFiles
-                args "$into"
-            }
+            exec "prop2po --progress=none --personality=mozilla --pot ${propertyFiles.join(' ')} $into"
         }
         inputs.removed { removed ->
             String baseName = removed.file.name - '.properties'

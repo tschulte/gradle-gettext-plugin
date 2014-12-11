@@ -25,7 +25,7 @@ import org.gradle.api.tasks.TaskExecutionException
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import org.gradle.api.tasks.incremental.InputFileDetails
 
-class UpdatePoTask extends DefaultTask {
+class UpdatePoTask extends AbstractGettextTask {
 
     @InputFiles
     FileCollection templates
@@ -53,9 +53,7 @@ class UpdatePoTask extends DefaultTask {
             translations.findAll { it.name.contains(baseName) }.each { translation ->
                 int i = translation.name.indexOf('_')
                 String lang = translation.name.substring(i + 1) - '.po'
-                project.exec {
-                    commandLine "msgmerge", "-vU", "--backup=off", "--lang=$lang", "$translation", "$template"
-                }
+                exec "msgmerge -vU --backup=off --lang=$lang $translation $template"
             }
         }
         inputs.removed { removed ->

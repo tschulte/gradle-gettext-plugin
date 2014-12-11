@@ -23,7 +23,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 
-class UpdatePropertiesTask extends DefaultTask {
+class UpdatePropertiesTask extends AbstractGettextTask {
 
     @InputFiles
     FileCollection from
@@ -47,9 +47,7 @@ class UpdatePropertiesTask extends DefaultTask {
             def file = outOfDate.file
             int i = file.name.indexOf('_')
             String baseName = file.name.substring(0, i)
-            project.exec {
-                commandLine "po2prop", "--personality=mozilla", "--removeuntranslated", "-t", "${file.parent}/${baseName}.properties", "$file", "$into"
-            }
+            exec "po2prop --personality=mozilla --removeuntranslated -t ${file.parent}/${baseName}.properties $file $into"
         }
         inputs.removed { removed ->
             new File(into, removed.file.name.replace('.po', '.properties')).delete()

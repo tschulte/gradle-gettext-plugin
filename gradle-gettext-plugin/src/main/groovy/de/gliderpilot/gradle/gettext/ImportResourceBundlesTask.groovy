@@ -24,7 +24,7 @@ import org.gradle.api.tasks.TaskExecutionException
 import org.gradle.api.tasks.TaskInputs
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 
-class ImportResourceBundlesTask extends DefaultTask {
+class ImportResourceBundlesTask extends AbstractGettextTask {
 
     @InputFiles
     FileCollection from
@@ -49,9 +49,7 @@ class ImportResourceBundlesTask extends DefaultTask {
             String baseName = file.name.substring(0, i)
             String poFileName = (file.name - '.properties') + '.po'
             if (!new File(into, poFileName).exists()) {
-                project.exec {
-                    commandLine "prop2po", "--personality=mozilla", "-t", "${file.parent}/${baseName}.properties", "$file", "$into"
-                }
+                exec "prop2po --personality=mozilla -t ${file.parent}/${baseName}.properties $file $into"
             } else {
                 logger.info("not importing ${file.name}, because po file already exists")
             }
