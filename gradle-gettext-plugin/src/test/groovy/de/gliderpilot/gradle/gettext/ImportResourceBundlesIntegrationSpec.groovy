@@ -153,6 +153,6 @@ class ImportResourceBundlesIntegrationSpec extends AbstractPluginSpecification {
         project.run(':importResourceBundles')
 
         then:
-        project.file('src/main/i18n/non-empty-translation-without-template_de.po').exists()
+        !project.file('src/main/i18n/non-empty-translation-without-template_de.po').exists()
     }
 }

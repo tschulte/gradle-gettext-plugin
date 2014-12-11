@@ -41,6 +41,7 @@ class GradleGettextPlugin implements Plugin<Project> {
         }
         project.tasks.create('importResourceBundles', ImportResourceBundlesTask) {
             finalizedBy updatePotTask
+            propertiesTemplateFiles propertiesDir
             propertiesFiles propertiesDir
             delegate.poDir poDir
         }

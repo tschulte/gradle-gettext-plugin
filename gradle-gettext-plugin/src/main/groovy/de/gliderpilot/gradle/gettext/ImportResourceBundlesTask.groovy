@@ -23,10 +23,20 @@ import org.gradle.api.tasks.TaskAction
 class ImportResourceBundlesTask extends AbstractGettextTask {
 
     @InputFiles
+    FileCollection propertiesTemplateFiles
+
+    @InputFiles
     FileCollection propertiesFiles
 
     @OutputDirectory
     File poDir
+
+    def propertiesTemplateFiles(propertiesTemplateFiles) {
+        this.propertiesTemplateFiles = project.fileTree(propertiesTemplateFiles) {
+            include '**/*.properties'
+            exclude '**/*_*.properties'
+        }
+    }
 
     def propertiesFiles(propertiesFiles) {
         this.propertiesFiles = project.fileTree(propertiesFiles) {
@@ -44,9 +54,13 @@ class ImportResourceBundlesTask extends AbstractGettextTask {
             int i = file.name.indexOf('_')
             String baseName = file.name.substring(0, i)
             String poFileName = (file.name - '.properties') + '.po'
-            File propertiesTemplate = new File(file.parent, "${baseName}.properties")
             if (!new File(poDir, poFileName).exists()) {
-                exec "prop2po --personality=mozilla -t ${project.relativePath(propertiesTemplate)} ${project.relativePath(file)} ${project.relativePath(poDir)}"
+                def propertiesTemplateFile = propertiesTemplateFiles.filter { it.name == "${baseName}.properties" }
+                if (propertiesTemplateFile.isEmpty()) {
+                    logger.info("not importing ${file.name}, because no ${baseName}.properties exists")
+                } else {
+                    exec "prop2po --personality=mozilla -t ${project.relativePath(propertiesTemplateFile.singleFile)} ${project.relativePath(file)} ${project.relativePath(poDir)}"
+                }
             } else {
                 logger.info("not importing ${file.name}, because po file already exists")
             }
