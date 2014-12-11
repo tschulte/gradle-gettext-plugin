@@ -27,6 +27,7 @@ class GradleGettextPlugin implements Plugin<Project> {
         def propertiesDir = "src/main/i18n"
         def updatePropertiesTask = project.tasks.create('updateProperties', UpdatePropertiesTask) {
             poFiles poDir
+            propertiesTemplateFiles propertiesDir
             delegate.propertiesDir propertiesDir
         }
         def updatePoTask = project.tasks.create('updatePo', UpdatePoTask) {

@@ -18,6 +18,7 @@ package de.gliderpilot.gradle.gettext
 import groovy.io.FileType
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
@@ -28,12 +29,22 @@ class UpdatePropertiesTask extends AbstractGettextTask {
     @InputFiles
     FileCollection poFiles
 
+    @Input
+    FileCollection propertiesTemplateFiles
+
     @OutputDirectory
     File propertiesDir
 
     def poFiles(poFiles) {
         this.poFiles = project.fileTree(poFiles) {
             include '**/*.po'
+        }
+    }
+
+    def propertiesTemplateFiles(propertiesTemplateFiles) {
+        this.propertiesTemplateFiles = project.fileTree(propertiesTemplateFiles) {
+            include '**/*.properties'
+            exclude '**/*_*.properties'
         }
     }
 
@@ -47,8 +58,8 @@ class UpdatePropertiesTask extends AbstractGettextTask {
             def file = outOfDate.file
             int i = file.name.indexOf('_')
             String baseName = file.name.substring(0, i)
-            File propertiesTemplate = new File(file.parent, "${baseName}.properties")
-            exec "po2prop --personality=mozilla --removeuntranslated -t ${project.relativePath(propertiesTemplate)} ${project.relativePath(file)} ${project.relativePath(propertiesDir)}"
+            def propertiesTemplateFile = propertiesTemplateFiles.filter { it.name == "${baseName}.properties" }
+            exec "po2prop --personality=mozilla --removeuntranslated -t ${project.relativePath(propertiesTemplateFile.singleFile)} ${project.relativePath(file)} ${project.relativePath(propertiesDir)}"
         }
         inputs.removed { removed ->
             new File(propertiesDir, removed.file.name.replace('.po', '.properties')).delete()
