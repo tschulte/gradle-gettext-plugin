@@ -16,27 +16,8 @@
 package de.gliderpilot.gradle.gettext
 
 import spock.lang.Ignore
-import spock.lang.Stepwise
 
-class ImportResourceBundlesIntegrationSpec extends AbstractPluginSpecification {
-
-    def setupSpec() {
-        IntegrationTestProject.enhance(project())
-        project.buildFile << """
-            buildscript {
-                dependencies {
-                    classpath files('${new File('build/classes/main').absoluteFile.toURI()}')
-                    classpath files('${new File('build/resources/main').absoluteFile.toURI()}')
-                }
-            }
-            apply plugin: 'de.gliderpilot.gettext'
-        """
-    }
-
-    def cleanup() {
-        project.cleanup()
-        project.file('src/main/i18n').deleteDir()
-    }
+class ImportResourceBundlesIntegrationSpec extends AbstractGradleGettextPluginIntegrationSpec {
 
     def "importResourceBundles is finalized by updatePot"() {
         when:

@@ -17,25 +17,7 @@ package de.gliderpilot.gradle.gettext
 
 import spock.lang.Ignore
 
-class FullRoundTripIntegrationSpec extends AbstractPluginSpecification {
-
-    def setupSpec() {
-        IntegrationTestProject.enhance(project())
-        project.buildFile << """
-            buildscript {
-                dependencies {
-                    classpath files('${new File('build/classes/main').absoluteFile.toURI()}')
-                    classpath files('${new File('build/resources/main').absoluteFile.toURI()}')
-                }
-            }
-            apply plugin: 'de.gliderpilot.gettext'
-        """
-    }
-
-    def cleanup() {
-        project.cleanup()
-        project.file('src/main/i18n').deleteDir()
-    }
+class FullRoundTripIntegrationSpec extends AbstractGradleGettextPluginIntegrationSpec {
 
     def "empty properties file"() {
         setup:
