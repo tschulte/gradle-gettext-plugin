@@ -31,6 +31,9 @@ class ImportResourceBundlesIntegrationSpec extends AbstractGradleGettextPluginIn
 
         and:
         project.wasExecuted(':updatePo')
+
+        and:
+        project.wasExecuted(':updateProperties')
     }
 
     def "empty properties file results in no po file"() {
