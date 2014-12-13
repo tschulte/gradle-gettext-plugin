@@ -155,4 +155,62 @@ class FullRoundTripIntegrationSpec extends AbstractGradleGettextPluginIntegratio
         project.file('src/main/i18n/empty-translation-for-non-empty_de.properties').text == ''
     }
 
+    def "translated properties file is stable"() {
+        setup:
+        project.createFile('src/main/i18n/template.properties').text = '''\
+            b=c
+            c=a
+            a=b
+        '''.stripIndent()
+        project.createFile('src/main/i18n/template_de.properties').text = '''\
+            b=c_de
+            c=a_de
+            a=b_de
+        '''.stripIndent()
+        project.createFile('src/main/i18n/template_fr.properties').text = '''\
+            b=c_fr
+            c=a_fr
+            a=b_fr
+        '''.stripIndent()
+
+        when:
+        project.run(':importResourceBundles')
+
+        then:
+        project.file('src/main/i18n/template_de.properties').text == '''\
+            b=c_de
+            c=a_de
+            a=b_de
+        '''.stripIndent()
+
+        and:
+        project.file('src/main/i18n/template_fr.properties').text == '''\
+            b=c_fr
+            c=a_fr
+            a=b_fr
+        '''.stripIndent()
+
+        when:
+        project.file('src/main/i18n/template.properties').text = '''\
+            a=b
+            b=c
+            c=a
+            y=z
+        '''.stripIndent()
+        project.run(':updatePot')
+
+        then:
+        project.file('src/main/i18n/template_de.properties').text == '''\
+            a=b_de
+            b=c_de
+            c=a_de
+        '''.stripIndent()
+
+        and:
+        project.file('src/main/i18n/template_fr.properties').text == '''\
+            a=b_fr
+            b=c_fr
+            c=a_fr
+        '''.stripIndent()
+    }
 }
