@@ -25,44 +25,21 @@ import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 
 class UpdatePotFromPropertiesTask extends AbstractGettextTask {
 
-    @InputFiles
-    FileCollection propertiesTemplateFiles
-
-    @OutputDirectory
-    File poTemplateDir
-
     def propertiesTemplateFiles(propertiesTemplateFiles) {
-        this.propertiesTemplateFiles = project.fileTree(propertiesTemplateFiles) {
+        from(propertiesTemplateFiles) {
             include '**/*.properties'
             exclude '**/*_*.properties'
         }
     }
 
     def poTemplateDir(poTemplateDir) {
-        this.poTemplateDir = project.file(poTemplateDir)
-    }
-
-    @TaskAction
-    def updatePot(IncrementalTaskInputs inputs) {
-        if (!inputs.incremental) {
-            poTemplateDir.eachFileMatch(FileType.FILES, ~/.*\.pot/) {
-                it.delete()
-            }
-        }
-        def propertiesFiles = []
-        inputs.outOfDate { outOfDate ->
-            propertiesFiles << project.relativePath(outOfDate.file)
-        }
-        if (propertiesFiles) {
-            exec "prop2po --progress=none --personality=mozilla --pot ${propertiesFiles.join(' ')} ${project.relativePath(poTemplateDir)}"
-        }
-        inputs.removed { removed ->
-            String baseName = removed.file.name - '.properties'
-            poTemplateDir.eachFileMatch(FileType.FILES, { it == "${baseName}.pot" }) {
-                it.delete()
-            }
+        into(poTemplateDir) {
+            include '**/*.pot'
         }
     }
 
-
+    @Override
+    protected void update(List<Map<String, String>> changedInputFiles) {
+        exec "prop2po --progress=none --personality=mozilla --pot ${changedInputFiles*.file.join(' ')} ${relativePath(into)}"
+    }
 }

@@ -25,6 +25,11 @@ class GradleGettextPlugin implements Plugin<Project> {
         project.extensions.create('gettext', GradleGettextPluginExtension, this, project)
         def poDir = "src/main/i18n"
         def propertiesDir = "src/main/i18n"
+        def msgInitTask = project.tasks.create('msgInit', MsgInitTask) {
+            poTemplateFiles poDir
+            languages 'de'
+            delegate.poDir poDir
+        }
         def updatePropertiesTask = project.tasks.create('updateProperties', UpdatePropertiesTask) {
             poFiles poDir
             propertiesTemplateFiles propertiesDir
@@ -36,7 +41,7 @@ class GradleGettextPlugin implements Plugin<Project> {
             poFiles poDir
         }
         def updatePotTask = project.tasks.create('updatePot', UpdatePotFromPropertiesTask) {
-            finalizedBy updatePoTask
+            finalizedBy msgInitTask, updatePoTask
             propertiesTemplateFiles propertiesDir
             poTemplateDir poDir
         }

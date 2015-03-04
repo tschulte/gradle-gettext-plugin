@@ -26,17 +26,11 @@ import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 
 class UpdatePropertiesTask extends AbstractGettextTask {
 
-    @InputFiles
-    FileCollection poFiles
-
     @Input
     FileCollection propertiesTemplateFiles
 
-    @OutputDirectory
-    File propertiesDir
-
     def poFiles(poFiles) {
-        this.poFiles = project.fileTree(poFiles) {
+        from(poFiles) {
             include '**/*.po'
         }
     }
@@ -49,22 +43,16 @@ class UpdatePropertiesTask extends AbstractGettextTask {
     }
 
     def propertiesDir(propertiesDir) {
-        this.propertiesDir = project.file(propertiesDir)
-    }
-
-    @TaskAction
-    def updateProperties(IncrementalTaskInputs inputs) {
-        inputs.outOfDate { outOfDate ->
-            def file = outOfDate.file
-            int i = file.name.indexOf('_')
-            String baseName = file.name.substring(0, i)
-            def propertiesTemplateFile = propertiesTemplateFiles.filter { it.name == "${baseName}.properties" }
-            exec "po2prop --personality=mozilla --removeuntranslated -t ${project.relativePath(propertiesTemplateFile.singleFile)} ${project.relativePath(file)} ${project.relativePath(propertiesDir)}"
-        }
-        inputs.removed { removed ->
-            new File(propertiesDir, removed.file.name.replace('.po', '.properties')).delete()
+        into(propertiesDir) {
+            include '**/*_*.properties'
         }
     }
 
-
+    @Override
+    protected void update(List<Map<String, String>> changedInputFiles) {
+        changedInputFiles.each { poFile ->
+            def propertiesTemplateFile = relativePath(propertiesTemplateFiles.findAll(sameBaseNameFilter(poFile)).first())
+            exec "po2prop --personality=mozilla --removeuntranslated -t ${propertiesTemplateFile} ${poFile} ${relativePath(into)}"
+        }
+    }
 }

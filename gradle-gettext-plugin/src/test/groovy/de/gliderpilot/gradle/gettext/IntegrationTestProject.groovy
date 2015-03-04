@@ -54,7 +54,7 @@ class IntegrationTestProject {
                 if (it.description.startsWith('Execute :'))
                     executedTasks.addAll(Arrays.asList((it.description - 'Execute ').split()))
             } as ProgressListener)
-            buildLauncher.forTasks(args).run()
+            buildLauncher.forTasks(args).withArguments('--info', '--stacktrace').run()
         } finally {
             println executedTasks
             connection.close()

@@ -16,16 +16,17 @@
 package de.gliderpilot.gradle.gettext
 
 import groovy.io.FileType
-import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.OutputFiles
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.TaskExecutionException
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
-import org.gradle.api.tasks.incremental.InputFileDetails
 
-class UpdatePoTask extends AbstractGettextTask {
+class MsgInitTask extends AbstractGettextTask {
+
+    @Input
+    List<String> languages
 
     def poTemplateFiles(poTemplateFiles) {
         from(poTemplateFiles) {
@@ -33,17 +34,23 @@ class UpdatePoTask extends AbstractGettextTask {
         }
     }
 
-    def poFiles(poFiles) {
-        into(poFiles) {
+    def languages(String... languages) {
+        this.languages = languages as List
+    }
+
+    def poDir(poDir) {
+        into(poDir) {
             include '**/*.po'
         }
     }
 
     @Override
     protected void update(List<Map<String, String>> changedInputFiles) {
-        changedInputFiles.each { input ->
-            into.findAll(sameBaseNameFilter(input)).collect(this.&attributes).each { poFile ->
-                exec "msgmerge -vU --backup=off --lang=${poFile.locale} ${poFile.file} ${input.file}"
+        changedInputFiles.each { inputFile ->
+            languages.each { language ->
+                File poFile = new File(into, "${inputFile.baseName}_${language}.po")
+                if (!poFile.exists())
+                    exec "msginit --locale=$language --no-translator -i ${inputFile.file} -o ${relativePath(poFile)}"
             }
         }
     }

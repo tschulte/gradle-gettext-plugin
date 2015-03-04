@@ -16,23 +16,19 @@
 package de.gliderpilot.gradle.gettext
 
 import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 
 class ImportResourceBundlesTask extends AbstractGettextTask {
 
-    @InputFiles
-    FileCollection propertiesTemplateFiles
-
-    @InputFiles
+    @Input
     FileCollection propertiesFiles
 
-    @OutputDirectory
-    File poDir
-
     def propertiesTemplateFiles(propertiesTemplateFiles) {
-        this.propertiesTemplateFiles = project.fileTree(propertiesTemplateFiles) {
+        from(propertiesTemplateFiles) {
             include '**/*.properties'
             exclude '**/*_*.properties'
         }
@@ -45,27 +41,36 @@ class ImportResourceBundlesTask extends AbstractGettextTask {
     }
 
     def poDir(poDir) {
-        this.poDir = project.file(poDir)
+        into(poDir) {
+            include '**/*.po'
+        }
     }
 
-    @TaskAction
-    def importBundles() {
-        propertiesFiles.each { file ->
-            int i = file.name.indexOf('_')
-            String baseName = file.name.substring(0, i)
-            String poFileName = (file.name - '.properties') + '.po'
-            if (!new File(poDir, poFileName).exists()) {
-                def propertiesTemplateFile = propertiesTemplateFiles.filter { it.name == "${baseName}.properties" }
+    @Override
+    protected void update(List<Map<String, String>> changedInputFiles) {
+        changedInputFiles.each { file ->
+            String poFileName = "${file.baseName}_${file.locale}.po"
+            if (!new File(into, poFileName).exists()) {
+                def propertiesTemplateFile = from.filter { it.name == "${file.baseName}.properties" }
                 if (propertiesTemplateFile.isEmpty()) {
-                    logger.info("not importing ${file.name}, because no ${baseName}.properties exists")
+                    logger.info("not importing ${file.file}, because no ${file.baseName}.properties exists")
                 } else {
-                    exec "prop2po --personality=mozilla -t ${project.relativePath(propertiesTemplateFile.singleFile)} ${project.relativePath(file)} ${project.relativePath(poDir)}"
+                    exec "prop2po --personality=mozilla -t ${relativePath(propertiesTemplateFile.singleFile)} ${file.file} ${relativePath(into)}"
                 }
             } else {
-                logger.info("not importing ${file.name}, because po file already exists")
+                logger.info("not importing ${file.file}, because po file already exists")
             }
         }
     }
 
+    @Override
+    protected void deleteAllOutputFilesWithoutInputFiles() {
+        // do nothing
+    }
+
+    @Override
+    protected void deleteOutputFilesFor(File inputFile) {
+        // do nothing
+    }
 
 }
