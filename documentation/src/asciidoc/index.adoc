@@ -1,4 +1,61 @@
 = Using the gradle-gettext-plugin
 Tobias Schulte <tobias.schulte@gliderpilot.de>
 :examplesDir: ../examples
+:icons: font
 
+== Translating Java properties files
+
+=== Problems with current situation
+When tasked with translating Java projects using properties files for translation, you have some problems.
+
+==== Changes to the default bundle are not reflected in the translated files
+Properties have no means to support updating translated bundles, if the template properties file changes.
+New keys in the template file are no big deal, tools can handle that. But when someone changed the default text
+of an existing key, tooling can only handle this, if it keept track of the original text in the template file.
+
+==== Crappy tooling support
+The most obvious way to translate properties files is to use a text editor. But not every translator knows about
+file encodings. Also, Java properties require ISO-8859-1, i.e. all special characters not present in ASCII have to be encoded
+in an ugly \u notation. It is possible to use UTF-8 in the bundles and either using a ResourceBundle.Control instance that can handle
+UTF-8, or using native2ascii, though.
+
+There exist web based translation tools, that can handle properties files, but these tools don't support marking translations
+as fuzzy, if the template for a key changed.
+
+=== The solution
+Using GNU gettext in combination with Java properties files fills the gap to solve some of the issues.
+
+==== The workflow
+The developer continues his work as before. She writes her code, creates properties files or alters an existing one, introducing
+keys with values representing the default language (usually English). When it is time to translate the project to German,
+she converts all template properties files to pot files.
+
+[source, bash, subs="verbatim"]
+----
+prop2po --pot -i test.properties -o test.pot
+----
+
+To translate the file to German, we need a _de.po file first.
+
+[source, bash]
+----
+msginit --locale=de -i test.pot -o test_de.po
+----
+
+will create the file. If the .po file already exists, it must not be created again, because this would overwrite all
+existing translations. In that case, you just merge the new keys.
+
+[source, bash]
+----
+msgmerge --backup=off -U test_de.po test.pot
+----
+
+The resulting .po file is given to the translator. Once the translation is complete, you can create the _de.properties.
+
+[source, bash]
+----
+po2prop --removeuntranslated -i test_de.po -o test_de.properties -t test.properties
+----
+
+==== Automate it
+The gradle-gettext-plugin can automate the

@@ -1,0 +1,4 @@
+= Using the gradle-gettext-plugin
+Tobias Schulte <tobias.schulte@gliderpilot.de>
+:examplesDir: ../examples
+
